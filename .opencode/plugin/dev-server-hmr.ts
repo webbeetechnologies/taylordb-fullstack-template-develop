@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import type { Plugin } from "@opencode-ai/plugin";
 import { Axios } from "axios";
 import { promises as fs } from "fs";
@@ -30,51 +31,68 @@ const updateAppStatus = async (status: "Errored" | "Active" | "Pending") => {
   );
 };
 
+const sessionRetries: Record<string, number> = {};
+
 export const DevServerHMRPlugin: Plugin = async ({ client, $ }) => {
   return {
     event: async ({ event }) => {
-      if (event.type !== "session.idle") return;
+      const isMessagedDone =
+        event.type === "message.updated" &&
+        // @ts-ignore
+        event.properties.info["finish"] === "stop";
 
-      const session = await client.session.get({
-        path: { id: event.properties.sessionID },
-      });
+      if (!isMessagedDone) return;
+
+      // @ts-ignore
+      const error = event.properties.info["error"];
+
+      const isAbortionError = error && error.name === "MessageAbortedError";
 
       const isAnyChange =
-        session.data?.summary?.files && session.data.summary.files > 0;
+        (await $`git status --porcelain`.quiet()).stdout.toString().trim() !==
+        "";
 
-      if (!isAnyChange) {
+      if (!isAnyChange || isAbortionError) {
         await updateAppStatus("Active");
 
         return;
       }
 
+      console.log("Building...");
+
       const result = await $`pnpm build`.quiet().catch((error) => error);
 
       if (result.exitCode !== 0) {
-        if (!client.session["tries"]) {
-          client.session["tries"] = 0;
+        if (!sessionRetries[event.properties.info.sessionID]) {
+          sessionRetries[event.properties.info.sessionID] = 1;
         } else {
-          client.session["tries"]++;
+          sessionRetries[event.properties.info.sessionID]++;
         }
 
-        if (client.session["tries"] > 3) {
+        if (sessionRetries[event.properties.info.sessionID] > 3) {
           await updateAppStatus("Errored");
 
           return;
         }
 
-        await client.session.prompt({
-          path: { id: event.properties.sessionID },
+        console.log(
+          `Retrying... ${sessionRetries[event.properties.info.sessionID]}`
+        );
+
+        await client.session.promptAsync({
+          path: { id: event.properties.info.sessionID },
           body: {
             parts: [
               {
                 type: "text",
-                text: `While building the project, the following error occurred:\n\n${result.stderr.toString()}\n\nPlease fix the error and try again.`,
+                text: `While building the project, the following error occurred:\n\n${result.stdout.toString()}\n\nPlease fix the error and try again.`,
               },
             ],
           },
         });
       }
+
+      sessionRetries[event.properties.info.sessionID] = 1;
 
       try {
         const packageJson = JSON.parse(
@@ -86,23 +104,30 @@ export const DevServerHMRPlugin: Plugin = async ({ client, $ }) => {
         const newVersion = `${major}.${minor}.${patch + 1}`;
 
         const messages = await client.session.messages({
-          path: { id: event.properties.sessionID },
+          path: { id: event.properties.info.sessionID },
         });
 
         if (!messages.data) {
           return;
         }
 
-        const title = messages.data
+        const currentMessage = messages.data
           .reverse()
           .find(
             (message) =>
               message.info.role === "user" &&
               message.info.summary &&
               message.info.summary.title
-          )?.info.summary?.["title"];
+          );
 
-        const commitMessage = title ?? `feat: release version v${newVersion}`;
+        if (!currentMessage) {
+          return;
+        }
+
+        const commitMessage =
+          // @ts-ignore
+          currentMessage.info.summary?.["title"] ??
+          `feat: release version v${newVersion}`;
 
         packageJson.version = newVersion;
 
@@ -111,10 +136,8 @@ export const DevServerHMRPlugin: Plugin = async ({ client, $ }) => {
           JSON.stringify(packageJson, null, 2)
         );
 
-        await $`git config user.name "Taylor AI"`.quiet();
-        await $`git config user.email "ai@taylordb.io"`.quiet();
         await $`git add .`.quiet();
-        await $`git commit -m ${commitMessage}`.quiet();
+        await $`GIT_AUTHOR_NAME="Taylor AI" GIT_AUTHOR_EMAIL="ai@taylordb.io" GIT_COMMITTER_NAME="Taylor AI" GIT_COMMITTER_EMAIL="ai@taylordb.io" git commit -m ${commitMessage}`.quiet();
         await $`git tag v${newVersion}`.quiet();
         await $`git push origin main --tags`.quiet();
       } catch (error) {
