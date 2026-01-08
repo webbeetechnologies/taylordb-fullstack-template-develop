@@ -19,19 +19,19 @@ app.use(
 );
 
 // Health check endpoint
-app.get("/health", (_req, res) => {
+app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 // tRPC middleware
 app.use(
-  "/trpc",
+  "/api/trpc",
   (req, res, next) => {
     // Handle root path access with a friendly message instead of a tRPC error
     if (req.path === "/" || req.path === "") {
       return res.json({
         message: "TaylorDB tRPC server is running!",
-        health: `http://${req.headers.host}/trpc/health`,
+        health: `http://${req.headers.host}/api/trpc/health`,
         timestamp: new Date().toISOString(),
       });
     }
@@ -46,5 +46,5 @@ app.use(
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📡 tRPC endpoint: http://localhost:${PORT}/trpc`);
+  console.log(`📡 tRPC endpoint: http://localhost:${PORT}/api/trpc`);
 });
