@@ -11,7 +11,10 @@ export const trpc: CreateTRPCReact<AppRouter, unknown> =
 /**
  * Get the base URL for tRPC requests
  */
-const BASE_URL = import.meta.env.VITE_TRPC_URL || "http://localhost:3001/api";
+const BASE_URL =
+  process.env.VITE_TRPC_URL ||
+  import.meta.env.VITE_TRPC_URL ||
+  "http://localhost:3001/api";
 
 /**
  * Create tRPC client
