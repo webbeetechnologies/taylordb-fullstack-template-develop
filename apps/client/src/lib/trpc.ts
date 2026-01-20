@@ -11,14 +11,11 @@ export const trpc: CreateTRPCReact<AppRouter, unknown> =
 /**
  * Get the base URL for tRPC requests
  */
-function getBaseUrl() {
-  if (typeof window !== "undefined") {
-    // Browser: use relative URL or environment variable
-    return import.meta.env.VITE_TRPC_URL || "http://localhost:3001/api";
-  }
-  // SSR: assume localhost
-  return "http://localhost:3001/api";
-}
+const BASE_URL =
+  (typeof globalThis.process !== "undefined" &&
+    globalThis.process.env?.VITE_TRPC_URL) ||
+  import.meta.env.VITE_TRPC_URL ||
+  "http://localhost:3001/api";
 
 /**
  * Create tRPC client
@@ -26,7 +23,7 @@ function getBaseUrl() {
 export const trpcClient: TRPCClient<AppRouter> = trpc.createClient({
   links: [
     httpBatchLink({
-      url: `${getBaseUrl()}/trpc`,
+      url: `${BASE_URL}/trpc`,
       // Optional: add headers, credentials, etc.
       // headers() {
       //   return {
