@@ -1,5 +1,4 @@
-import pkg from "@taylordb/query-builder";
-const { createQueryBuilder } = pkg;
+import { createQueryBuilder } from "@taylordb/query-builder";
 import type { TaylorDatabase } from "./types.js";
 
 /**

@@ -59,8 +59,7 @@ Document your design decisions briefly before implementing.
 This file contains all database operations. Create type-safe CRUD functions for each table:
 
 ```typescript
-import pkg from "@taylordb/query-builder";
-const { createQueryBuilder } = pkg;
+import { createQueryBuilder } from "@taylordb/query-builder";
 import type { TaylorDatabase } from "./types.js";
 
 export const queryBuilder = createQueryBuilder<TaylorDatabase>({

@@ -23,8 +23,7 @@ This document provides comprehensive examples of how to use the TaylorDB query b
 ### Initialize Query Builder
 
 ```typescript
-import pkg from "@taylordb/query-builder";
-const { createQueryBuilder } = pkg;
+import { createQueryBuilder } from "@taylordb/query-builder";
 import type { TaylorDatabase } from "./types.js";
 
 export const queryBuilder = createQueryBuilder<TaylorDatabase>({
