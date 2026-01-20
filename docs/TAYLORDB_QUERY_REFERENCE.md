@@ -23,8 +23,7 @@ This document provides comprehensive examples of how to use the TaylorDB query b
 ### Initialize Query Builder
 
 ```typescript
-import pkg from "@taylordb/query-builder";
-const { createQueryBuilder } = pkg;
+import { createQueryBuilder } from "@taylordb/query-builder";
 import type { TaylorDatabase } from "./types.js";
 
 export const queryBuilder = createQueryBuilder<TaylorDatabase>({
@@ -308,7 +307,7 @@ export async function updateUser(
     name?: string;
     email?: string;
     age?: number;
-  }
+  },
 ) {
   return await queryBuilder
     .update("users")
@@ -325,7 +324,7 @@ export async function updateUser(
 ```typescript
 export async function updateTaskPriority(
   id: number,
-  priority: "low" | "medium" | "high"
+  priority: "low" | "medium" | "high",
 ) {
   return await queryBuilder
     .update("tasks")
@@ -343,7 +342,7 @@ export async function updateCardioSession(
   data: {
     distance?: number;
     duration?: number;
-  }
+  },
 ) {
   // Fetch current record to compute speed
   const currentRecord = await queryBuilder
@@ -583,7 +582,7 @@ export async function createTask(data: {
 }
 
 export async function getTasksByStatus(
-  status: (typeof TaskStatusOptions)[number]
+  status: (typeof TaskStatusOptions)[number],
 ) {
   return await queryBuilder
     .selectFrom("tasks")

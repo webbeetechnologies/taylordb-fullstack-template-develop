@@ -59,8 +59,7 @@ Document your design decisions briefly before implementing.
 This file contains all database operations. Create type-safe CRUD functions for each table:
 
 ```typescript
-import pkg from "@taylordb/query-builder";
-const { createQueryBuilder } = pkg;
+import { createQueryBuilder } from "@taylordb/query-builder";
 import type { TaylorDatabase } from "./types.js";
 
 export const queryBuilder = createQueryBuilder<TaylorDatabase>({
@@ -108,7 +107,7 @@ export async function createItem(data: { name: string; status: string }) {
 
 export async function updateItem(
   id: number,
-  data: { name?: string; status?: string }
+  data: { name?: string; status?: string },
 ) {
   return await queryBuilder
     .update("items")
@@ -167,7 +166,7 @@ export const appRouter = router({
         z.object({
           name: z.string().min(1),
           status: z.string(),
-        })
+        }),
       )
       .mutation(async ({ input }) => {
         return await db.createItem(input);
@@ -179,7 +178,7 @@ export const appRouter = router({
           id: z.number(),
           name: z.string().optional(),
           status: z.string().optional(),
-        })
+        }),
       )
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
@@ -474,25 +473,21 @@ The dev server should be running. Test:
 ### Visual Excellence Principles
 
 1. **No Generic Colors**: Never use plain red/blue/green. Use curated HSL palettes.
-
    - ✅ `hsl(262 83% 58%)` (vibrant purple)
    - ❌ `#0000ff` (plain blue)
 
 2. **Premium Aesthetics**: Make it feel high-end
-
    - Use subtle gradients, shadows, and glassmorphism
    - Add smooth transitions (`transition-all duration-200`)
    - Implement hover states on interactive elements
    - Use proper spacing and visual hierarchy
 
 3. **Modern Typography**:
-
    - Import Google Fonts (e.g., Inter, Outfit, Manrope)
    - Use varied font weights (400, 500, 600, 700)
    - Proper text sizing hierarchy
 
 4. **Micro-Animations**:
-
    - Loading spinners with `lucide-react` icons + `animate-spin`
    - Fade-ins on data load
    - Smooth transitions on hover
