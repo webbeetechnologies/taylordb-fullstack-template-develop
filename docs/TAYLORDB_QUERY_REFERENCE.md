@@ -29,7 +29,7 @@ import type { TaylorDatabase } from "./types.js";
 export const queryBuilder = createQueryBuilder<TaylorDatabase>({
   baseUrl: process.env.TAYLORDB_BASE_URL!,
   baseId: process.env.TAYLORDB_SERVER_ID!,
-  apiKey: process.env.TAYLORDB_API_TOKEN!,
+  apiKey: "",
 });
 ```
 

@@ -174,7 +174,6 @@ This template is designed to deploy to TaylorDB's platform using the included `t
 **Environment Variables Required:**
 
 - `TAYLORDB_BASE_URL`
-- `TAYLORDB_API_TOKEN`
 - `TAYLORDB_SERVER_ID`
 
 ---

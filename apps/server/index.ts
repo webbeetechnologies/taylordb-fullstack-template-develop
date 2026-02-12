@@ -1,11 +1,15 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import { appRouter } from "./router.js";
 import { createContext } from "./trpc.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Parse cookies
+app.use(cookieParser());
 
 // Enable CORS for frontend (adjust origin in production)
 app.use(
