@@ -3,6 +3,7 @@ import {
   HelloExample,
   UsersExample,
   PostsExample,
+  FileUploadExample,
 } from "@/components/demo/examples";
 
 export default function TRPCDemoPage() {
@@ -29,6 +30,7 @@ export default function TRPCDemoPage() {
           <HelloExample />
           <UsersExample />
           <PostsExample />
+          <FileUploadExample />
         </main>
 
         {/* Footer */}

@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import { appRouter } from "./router.js";
 import { createContext } from "./trpc.js";
+import { fileUploadRouter } from "./routers/fileUpload.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +27,9 @@ app.use(
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
+// File upload endpoint (multipart/form-data — not supported by tRPC Express adapter)
+app.use("/api/upload", fileUploadRouter);
 
 // tRPC middleware
 app.use(

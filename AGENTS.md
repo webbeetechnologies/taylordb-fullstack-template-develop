@@ -15,6 +15,29 @@ Build production-ready, modern web applications (primarily dashboards and CRUD i
 
 ---
 
+## 📚 Docs for Agents
+
+Before you start implementing, skim these docs in the `docs/` folder:
+
+- **TaylorDB Query Builder**  
+  - `docs/TAYLORDB_QUERY_REFERENCE.md` – index for all query examples  
+  - `docs/TAYLORDB_BASIC_QUERIES.md` – basic reads, filtering, dates  
+  - `docs/TAYLORDB_WRITE_OPERATIONS.md` – inserts, updates, deletes  
+  - `docs/TAYLORDB_ADVANCED_PATTERNS.md` – aggregations, pagination, conditional queries  
+  - `docs/TAYLORDB_FIELD_TYPES.md` – field type mapping & enums  
+  - `docs/TAYLORDB_ATTACHMENTS.md` – working with attachment fields  
+  - `docs/TAYLORDB_PITFALLS_BEST_PRACTICES.md` – common mistakes & best practices
+
+- **shadcn/ui Components & Dashboard Patterns**  
+  - `docs/SHADCN_COMPONENTS_GUIDE.md` – index for all shadcn/ui docs  
+  - `docs/SHADCN_INSTALLATION.md` – how to install shadcn/ui components  
+  - `docs/SHADCN_DASHBOARD_PATTERNS.md` – ready-made dashboard/layout patterns  
+  - `docs/SHADCN_DESIGN_AND_LAYOUT.md` – design tokens, layout, responsive & performance tips
+
+Use `AGENTS.md` for **workflow and rules** and the `docs/` files for **detailed code examples**.
+
+---
+
 ## 📋 Development Workflow
 
 ### **Phase 1: Understand Requirements & Design**
@@ -235,21 +258,16 @@ Update the design tokens based on your chosen color scheme:
 
 #### Step 2: Create shadcn/ui Components
 
-**Always use shadcn/ui components**. Install components as needed:
+**Always use shadcn/ui components**. Install components as needed with:
 
 ```bash
 pnpm dlx shadcn@latest add <component-name>
 ```
 
-**Available by default:**
+For concrete install commands and patterns:
 
-- `button`, `card`, `input`, `label`, `textarea`, `select`, `tabs`, `alert`
-
-**Common additions for dashboards:**
-
-- `table`, `dialog`, `dropdown-menu`, `toast`, `sheet`, `form`, `badge`, `avatar`, `skeleton`
-
-Install with: `pnpm dlx shadcn@latest add table dialog dropdown-menu toast sheet form badge avatar skeleton`
+- See `docs/SHADCN_INSTALLATION.md` for component install snippets
+- See `docs/SHADCN_DASHBOARD_PATTERNS.md` for tables, dialogs, forms, toasts, sheets, command palette, etc.
 
 #### Step 3: Build Page Components
 
@@ -576,60 +594,17 @@ apps/client/src/
 
 ## 🔧 TaylorDB Query Builder Reference
 
-### Common Query Patterns
+Instead of duplicating examples here, use the dedicated docs:
 
-```typescript
-// SELECT with specific fields
-queryBuilder
-  .selectFrom("tableName")
-  .select(["id", "name", "status"])
-  .execute();
+- `docs/TAYLORDB_QUERY_REFERENCE.md` – index for all query builder docs
+- `docs/TAYLORDB_BASIC_QUERIES.md` – `selectFrom`, filtering, ordering, date filters
+- `docs/TAYLORDB_WRITE_OPERATIONS.md` – `insertInto`, `update`, `deleteFrom`
+- `docs/TAYLORDB_ADVANCED_PATTERNS.md` – aggregations, totals, conditional queries, pagination
+- `docs/TAYLORDB_FIELD_TYPES.md` – field type mapping, nullable handling, enums
+- `docs/TAYLORDB_ATTACHMENTS.md` – selecting and writing attachment fields
+- `docs/TAYLORDB_PITFALLS_BEST_PRACTICES.md` – pitfalls and best practices
 
-// WHERE conditions
-.where("status", "=", "active")
-.where("createdAt", ">=", ["exactDay", "2024-01-01"])
-.where("tags", "hasAnyOf", ["tag1", "tag2"])
-
-// ORDER BY
-.orderBy("createdAt", "desc")
-.orderBy("name", "asc")
-
-// INSERT
-queryBuilder
-  .insertInto("tableName")
-  .values({ name: "John", status: "active" })
-  .executeTakeFirst();
-
-// UPDATE
-queryBuilder
-  .update("tableName")
-  .set({ status: "inactive" })
-  .where("id", "=", 123)
-  .execute();
-
-// DELETE
-queryBuilder
-  .deleteFrom("tableName")
-  .where("id", "=", 123)
-  .execute();
-
-// DELETE multiple
-queryBuilder
-  .deleteFrom("tableName")
-  .where("id", "hasAnyOf", [1, 2, 3])
-  .execute();
-```
-
-### Field Type Handling
-
-| TaylorDB Field Type | TypeScript Type | Query Value Format           |
-| ------------------- | --------------- | ---------------------------- |
-| Text                | `string`        | `"value"`                    |
-| Number              | `number`        | `42`                         |
-| Date                | `string`        | `["exactDay", "2024-01-01"]` |
-| Single Select       | `string[]`      | `["option"]`                 |
-| Multi Select        | `string[]`      | `["opt1", "opt2"]`           |
-| Checkbox            | `boolean`       | `true` / `false`             |
+When writing queries in `apps/server/taylordb/query-builder.ts`, mirror the patterns from these docs and keep everything **strongly typed** using `taylordb/types.ts`.
 
 ---
 

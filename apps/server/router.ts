@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "./trpc";
-import { usersRouter, postsRouter } from "./routers";
+import { usersRouter, postsRouter, submitUserDataRouter } from "./routers";
 
 /**
  * Main tRPC Router
@@ -20,6 +20,7 @@ export const appRouter = router({
   // ============================================================================
   users: usersRouter,
   posts: postsRouter,
+  submitUserData: submitUserDataRouter,
 
   // ============================================================================
   // Global / Utility Procedures
