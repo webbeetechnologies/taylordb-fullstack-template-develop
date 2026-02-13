@@ -71,7 +71,7 @@ export const postsRouter = router({
         })
         .optional(),
     )
-    .query(({ input, ctx }) => {
+    .query(({ input }) => {
       let result = posts;
 
       if (input?.published !== undefined) {

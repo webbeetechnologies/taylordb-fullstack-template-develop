@@ -1,7 +1,7 @@
 import { createQueryBuilder } from "@taylordb/query-builder";
 import { initTRPC } from "@trpc/server";
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import { TaylorDatabase } from "./taylordb/types";
+import type { TaylorDatabase } from "./taylordb/types";
 
 /**
  * Create context for each tRPC request
