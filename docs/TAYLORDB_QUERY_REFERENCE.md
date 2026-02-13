@@ -14,7 +14,8 @@ This document provides comprehensive examples of how to use the TaylorDB query b
 6. [Deleting Data](#deleting-data)
 7. [Advanced Patterns](#advanced-patterns)
 8. [Field Type Handling](#field-type-handling)
-9. [Common Pitfalls](#common-pitfalls)
+9. [Attachments](#attachments)
+10. [Common Pitfalls](#common-pitfalls)
 
 ---
 
@@ -163,14 +164,28 @@ export async function getUsersByTags(tags: string[]) {
 const adminUsers = await getUsersByTags(["admin", "moderator"]);
 ```
 
-### Single Select Filtering
+### Select Field Filtering
+
+#### Single Select
+For single-select fields, the query builder now returns a single string value.
 
 ```typescript
-// For single-select fields (stored as arrays in TaylorDB)
 export async function getUsersByRole(role: string) {
   return await queryBuilder
     .selectFrom("users")
     .where("role", "=", role)
+    .execute();
+}
+```
+
+#### Multi Select
+For multi-select fields, the query builder returns and accepts multiple values.
+
+```typescript
+export async function getUsersByInterests(interests: string[]) {
+  return await queryBuilder
+    .selectFrom("users")
+    .where("interests", "hasAnyOf", interests)
     .execute();
 }
 ```
@@ -214,6 +229,8 @@ export async function createUser(data: {
 
 ### Insert with Single-Select Field
 
+Single-select fields now accept a single string value directly.
+
 ```typescript
 export async function createTask(data: {
   title: string;
@@ -223,7 +240,7 @@ export async function createTask(data: {
     .insertInto("tasks")
     .values({
       title: data.title,
-      priority: [data.priority], // Wrap in array for single-select
+      priority: data.priority,
     })
     .executeTakeFirst();
 }
@@ -328,7 +345,7 @@ export async function updateTaskPriority(
 ) {
   return await queryBuilder
     .update("tasks")
-    .set({ priority: [priority] }) // Wrap in array
+    .set({ priority })
     .where("id", "=", id)
     .execute();
 }
@@ -533,15 +550,16 @@ export async function getPaginatedUsers(page: number, pageSize: number) {
 
 ### Field Type Reference
 
-| TaylorDB Field Type | TypeScript Type | Insert Value         | Query Value                  |
-| ------------------- | --------------- | -------------------- | ---------------------------- |
-| **Text**            | `string`        | `"Hello"`            | `"Hello"`                    |
-| **Number**          | `number`        | `42`                 | `42`                         |
-| **Date**            | `string` (ISO)  | `"2024-01-15"`       | `["exactDay", "2024-01-15"]` |
-| **Checkbox**        | `boolean`       | `true`               | `true`                       |
-| **Single Select**   | `string[]`      | `["option"]`         | `"option"`                   |
-| **Multi Select**    | `string[]`      | `["opt1", "opt2"]`   | `tags: ["opt1", "opt2"]`     |
-| **Email**           | `string`        | `"user@example.com"` | `"user@example.com"`         |
+| TaylorDB Field Type | TypeScript Type      | Insert Value           | Query Value                  |
+| ------------------- | -------------------- | ---------------------- | ---------------------------- |
+| **Text**            | `string`             | `"Hello"`              | `"Hello"`                    |
+| **Number**          | `number`             | `42`                   | `42`                         |
+| **Date**            | `string` (ISO)       | `"2024-01-15"`         | `["exactDay", "2024-01-15"]` |
+| **Checkbox**        | `boolean`            | `true`                 | `true`                       |
+| **Single Select**   | `string`             | `"option"`             | `"option"`                   |
+| **Multi Select**    | `string[]`           | `["opt1", "opt2"]`     | `["opt1", "opt2"]`           |
+| **Attachment**      | `string[]` (File Paths) | `uploadAttachments()`  | `"file-path"`                |
+| **Email**           | `string`             | `"user@example.com"`   | `"user@example.com"`         |
 
 ### Handling Nullable Fields
 
@@ -576,7 +594,7 @@ export async function createTask(data: {
     .insertInto("tasks")
     .values({
       title: data.title,
-      status: [data.status], // Single select as array
+      status: data.status,
     })
     .executeTakeFirst();
 }
@@ -594,16 +612,6 @@ export async function getTasksByStatus(
 ---
 
 ## Common Pitfalls
-
-### ❌ Pitfall 1: Not Wrapping Single-Select in Array
-
-```typescript
-// ❌ WRONG
-.values({ priority: "high" })
-
-// ✅ CORRECT
-.values({ priority: ["high"] })
-```
 
 ### ❌ Pitfall 2: Not Using exactDay for Dates
 
@@ -686,6 +694,54 @@ const avg = ages.reduce((a, b) => a + b, 0) / ages.length;
 8. **Group related queries** in the same function file
 9. **Export functions**, not raw queries
 10. **Document complex queries** with JSDoc comments
+
+---
+
+## Attachments
+
+Attachments are no longer treated as relations. They are now standard columns and can be selected directly.
+
+### Select Attachments
+
+```typescript
+// New Standard: Use regular .select() like any other field.
+const expenses = await qb
+  .selectFrom('expenses')
+  .select(['id', 'amount', 'receipt'])
+  .execute();
+```
+
+### Create with Attachments
+
+Use `qb.uploadAttachments` to upload files before inserting.
+
+```typescript
+await qb
+  .insertInto('customers')
+  .values({
+    firstName: 'Jane',
+    lastName: 'Doe',
+    avatar: await qb.uploadAttachments([
+      { file: new Blob(['']), name: 'test.png' },
+    ]),
+  })
+  .execute();
+```
+
+### Update with Attachments
+
+```typescript
+await qb
+  .update('customers')
+  .set({
+    lastName: 'Smith',
+    avatar: await qb.uploadAttachments([
+      { file: new Blob(['']), name: 'test.png' },
+    ]),
+  })
+  .where('id', '=', 1)
+  .execute();
+```
 
 ---
 
