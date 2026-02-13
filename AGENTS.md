@@ -54,19 +54,15 @@ Document your design decisions briefly before implementing.
 
 #### Step 1: Set Up Server-Side Data Layer
 
-**File: `apps/server/taylordb/query-builder.ts`**
+Use querybuilder which is in **File: `apps/server/taylordb/query-builder.ts`**
 
-This file contains all database operations. Create type-safe CRUD functions for each table:
+You can access the query builder from
 
 ```typescript
-import { createQueryBuilder } from "@taylordb/query-builder";
-import type { TaylorDatabase } from "./types.js";
-
-export const queryBuilder = createQueryBuilder<TaylorDatabase>({
-  baseUrl: process.env.TAYLORDB_BASE_URL!,
-  baseId: process.env.TAYLORDB_SERVER_ID!,
-  apiKey: "",
+publicProcedure.input({}).query(({ input }) => {
+  const queryBuilder = ctx.queryBuilder;
 });
+```
 
 // ============================================================================
 // READ Operations

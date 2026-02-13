@@ -19,25 +19,6 @@ This document provides comprehensive examples of how to use the TaylorDB query b
 
 ---
 
-## Setup & Configuration
-
-### Initialize Query Builder
-
-```typescript
-import { createQueryBuilder } from "@taylordb/query-builder";
-import type { TaylorDatabase } from "./types.js";
-
-export const queryBuilder = createQueryBuilder<TaylorDatabase>({
-  baseUrl: process.env.TAYLORDB_BASE_URL!,
-  baseId: process.env.TAYLORDB_SERVER_ID!,
-  apiKey: "",
-});
-```
-
-The type parameter `<TaylorDatabase>` provides full type safety based on your generated schema.
-
----
-
 ## Basic Queries
 
 ### Get All Records
@@ -167,6 +148,7 @@ const adminUsers = await getUsersByTags(["admin", "moderator"]);
 ### Select Field Filtering
 
 #### Single Select
+
 For single-select fields, the query builder now returns a single string value.
 
 ```typescript
@@ -179,6 +161,7 @@ export async function getUsersByRole(role: string) {
 ```
 
 #### Multi Select
+
 For multi-select fields, the query builder returns and accepts multiple values.
 
 ```typescript
@@ -550,16 +533,16 @@ export async function getPaginatedUsers(page: number, pageSize: number) {
 
 ### Field Type Reference
 
-| TaylorDB Field Type | TypeScript Type      | Insert Value           | Query Value                  |
-| ------------------- | -------------------- | ---------------------- | ---------------------------- |
-| **Text**            | `string`             | `"Hello"`              | `"Hello"`                    |
-| **Number**          | `number`             | `42`                   | `42`                         |
-| **Date**            | `string` (ISO)       | `"2024-01-15"`         | `["exactDay", "2024-01-15"]` |
-| **Checkbox**        | `boolean`            | `true`                 | `true`                       |
-| **Single Select**   | `string`             | `"option"`             | `"option"`                   |
-| **Multi Select**    | `string[]`           | `["opt1", "opt2"]`     | `["opt1", "opt2"]`           |
-| **Attachment**      | `string[]` (File Paths) | `uploadAttachments()`  | `"file-path"`                |
-| **Email**           | `string`             | `"user@example.com"`   | `"user@example.com"`         |
+| TaylorDB Field Type | TypeScript Type         | Insert Value          | Query Value                  |
+| ------------------- | ----------------------- | --------------------- | ---------------------------- |
+| **Text**            | `string`                | `"Hello"`             | `"Hello"`                    |
+| **Number**          | `number`                | `42`                  | `42`                         |
+| **Date**            | `string` (ISO)          | `"2024-01-15"`        | `["exactDay", "2024-01-15"]` |
+| **Checkbox**        | `boolean`               | `true`                | `true`                       |
+| **Single Select**   | `string`                | `"option"`            | `"option"`                   |
+| **Multi Select**    | `string[]`              | `["opt1", "opt2"]`    | `["opt1", "opt2"]`           |
+| **Attachment**      | `string[]` (File Paths) | `uploadAttachments()` | `"file-path"`                |
+| **Email**           | `string`                | `"user@example.com"`  | `"user@example.com"`         |
 
 ### Handling Nullable Fields
 
@@ -706,8 +689,8 @@ Attachments are no longer treated as relations. They are now standard columns an
 ```typescript
 // New Standard: Use regular .select() like any other field.
 const expenses = await qb
-  .selectFrom('expenses')
-  .select(['id', 'amount', 'receipt'])
+  .selectFrom("expenses")
+  .select(["id", "amount", "receipt"])
   .execute();
 ```
 
@@ -717,12 +700,12 @@ Use `qb.uploadAttachments` to upload files before inserting.
 
 ```typescript
 await qb
-  .insertInto('customers')
+  .insertInto("customers")
   .values({
-    firstName: 'Jane',
-    lastName: 'Doe',
+    firstName: "Jane",
+    lastName: "Doe",
     avatar: await qb.uploadAttachments([
-      { file: new Blob(['']), name: 'test.png' },
+      { file: new Blob([""]), name: "test.png" },
     ]),
   })
   .execute();
@@ -732,14 +715,14 @@ await qb
 
 ```typescript
 await qb
-  .update('customers')
+  .update("customers")
   .set({
-    lastName: 'Smith',
+    lastName: "Smith",
     avatar: await qb.uploadAttachments([
-      { file: new Blob(['']), name: 'test.png' },
+      { file: new Blob([""]), name: "test.png" },
     ]),
   })
-  .where('id', '=', 1)
+  .where("id", "=", 1)
   .execute();
 ```
 
