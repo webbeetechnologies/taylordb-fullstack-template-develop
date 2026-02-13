@@ -59,7 +59,7 @@ Use querybuilder which is in **File: `apps/server/taylordb/query-builder.ts`**
 You can access the query builder from
 
 ```typescript
-publicProcedure.input({}).query(({ input }) => {
+publicProcedure.input({}).query(({ input, ctx }) => {
   const queryBuilder = ctx.queryBuilder;
 });
 ```
