@@ -6,6 +6,39 @@ import { router, publicProcedure } from "../trpc";
  *
  * Another example sub-router showing a different domain.
  * Demonstrates relationships (author references users).
+ * 
+ * Example using TaylorDB queryBuilder (available via ctx.queryBuilder):
+ * 
+ * // Query all posts
+ * const posts = await ctx.queryBuilder.from("posts").select("*");
+ * 
+ * // Query with filters
+ * const publishedPosts = await ctx.queryBuilder
+ *   .from("posts")
+ *   .where({ published: true })
+ *   .select("*");
+ * 
+ * // Create a new post
+ * const newPost = await ctx.queryBuilder
+ *   .from("posts")
+ *   .insert({
+ *     title: "My Title",
+ *     content: "My Content",
+ *     authorId: 1,
+ *     published: false
+ *   });
+ * 
+ * // Update a post
+ * const updatedPost = await ctx.queryBuilder
+ *   .from("posts")
+ *   .where({ id: 1 })
+ *   .update({ published: true });
+ * 
+ * // Delete a post
+ * await ctx.queryBuilder
+ *   .from("posts")
+ *   .where({ id: 1 })
+ *   .delete();
  */
 
 // In-memory store for demonstration
@@ -36,9 +69,9 @@ export const postsRouter = router({
           published: z.boolean().optional(),
           authorId: z.number().optional(),
         })
-        .optional()
+        .optional(),
     )
-    .query(({ input }) => {
+    .query(({ input, ctx }) => {
       let result = posts;
 
       if (input?.published !== undefined) {
@@ -88,7 +121,7 @@ export const postsRouter = router({
         title: z.string().min(1).max(200).optional(),
         content: z.string().min(1).optional(),
         published: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(({ input }) => {
       const post = posts.find((p) => p.id === input.id);

@@ -21,7 +21,6 @@ services:
       env:
         vars:
           TAYLORDB_BASE_URL: vars.TAYLORDB_INTERNAL_BASE_URL
-          TAYLORDB_API_TOKEN: secrets.TAYLORDB_API_TOKEN
           TAYLORDB_SERVER_ID: vars.TAYLORDB_SERVER_ID
           FRONTEND_URL: routing.client.url
 
@@ -31,7 +30,6 @@ services:
       env:
         vars:
           TAYLORDB_BASE_URL: vars.TAYLORDB_INTERNAL_BASE_URL
-          TAYLORDB_API_TOKEN: secrets.TAYLORDB_API_TOKEN
           TAYLORDB_SERVER_ID: vars.TAYLORDB_SERVER_ID
           FRONTEND_URL: routing.client.url
       
@@ -41,7 +39,6 @@ services:
       env:
         vars:
           TAYLORDB_BASE_URL: vars.TAYLORDB_INTERNAL_BASE_URL
-          TAYLORDB_API_TOKEN: secrets.TAYLORDB_API_TOKEN
           TAYLORDB_SERVER_ID: vars.TAYLORDB_SERVER_ID
           FRONTEND_URL: routing.client.url
   
