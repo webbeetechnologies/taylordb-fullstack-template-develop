@@ -68,6 +68,7 @@ services:
           VITE_TRPC_URL: routing.server.url
 
 taylordb:
+  version: 0.9.0
   types:
     - output: apps/server/taylordb/types.ts
       format: typescript
