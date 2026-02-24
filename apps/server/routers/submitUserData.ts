@@ -4,63 +4,63 @@ import { router, publicProcedure } from "../trpc";
 /**
  * Submit User Data Router
  *
- * tRPC router for submitting user data (name, email) with file attachment references.
- * Files should first be uploaded via /api/upload, then referenced here.
+ * tRPC 11 router demonstrating multipart/form-data input support.
+ * Accepts name, email, cv, and profileImage in a single tRPC mutation.
  *
- * In a real app, you'd use qb.uploadAttachments() to store files in TaylorDB
- * and insert the record with the attachment column. This demo uses in-memory storage.
- *
- * TaylorDB attachment pattern (see docs/TAYLORDB_ATTACHMENTS.md):
- *   await qb.insertInto("users").values({
- *     name: "Jane",
- *     avatar: await qb.uploadAttachments([
- *       { file: new Blob([buffer]), name: "photo.png" },
- *     ]),
+ * TaylorDB attachment pattern:
+ *   const cv = input.get("cv") as File | null;
+ *   const profileImage = input.get("profileImage") as File | null;
+ *   const attachments = await ctx.queryBuilder.uploadAttachments([
+ *     { file: cv, name: cv.name },
+ *     { file: profileImage, name: profileImage.name },
+ *   ]);
+ *   await ctx.queryBuilder.insertInto("users").values({
+ *     name,
+ *     email,
+ *     cv: attachments[0],
+ *     profileImage: attachments[1],
  *   }).execute();
  */
 
-// In-memory store for demonstration
-interface Submission {
-  id: number;
-  name: string;
-  email: string;
-  files: { originalName: string; mimeType: string; size: number }[];
-  submittedAt: string;
-}
-
-const submissions: Submission[] = [];
-let nextId = 1;
-
 export const submitUserDataRouter = router({
-  /** Submit user data with file metadata */
+  /** Submit user data with named file fields via multipart/form-data (tRPC 11) */
   submit: publicProcedure
-    .input(
-      z.object({
-        name: z.string().min(1, "Name is required"),
-        email: z.string().email("Valid email is required"),
-        files: z.array(
-          z.object({
-            originalName: z.string(),
-            mimeType: z.string(),
-            size: z.number(),
-          })
-        ),
-      })
-    )
-    .mutation(({ input }) => {
-      const submission: Submission = {
-        id: nextId++,
-        name: input.name,
-        email: input.email,
-        files: input.files,
-        submittedAt: new Date().toISOString(),
-      };
-      submissions.push(submission);
-      return submission;
-    }),
+    .input(z.instanceof(FormData))
+    .mutation(async ({ input }) => {
+      const name = input.get("name") as string | null;
+      const email = input.get("email") as string | null;
+      const cv = input.get("cv") as File | null;
+      const profileImage = input.get("profileImage") as File | null;
 
-  /** Get all submissions */
-  getAll: publicProcedure.query(() => {
-    return submissions;
-  }),
+      const fileInfo = (file: File | null) =>
+        file && file.size > 0
+          ? { name: file.name, size: file.size, type: file.type }
+          : null;
+
+      // ──────────────────────────────────────────────────────────────────────
+      // TaylorDB Attachment Example
+      //
+      // File objects are available directly — pass them to uploadAttachments:
+      //
+      //   const attachments = await ctx.queryBuilder.uploadAttachments([
+      //     ...(cv ? [{ file: cv, name: cv.name }] : []),
+      //     ...(profileImage ? [{ file: profileImage, name: profileImage.name }] : []),
+      //   ]);
+      //   await ctx.queryBuilder.insertInto("users").values({
+      //     name,
+      //     email,
+      //     cv: attachments[0],
+      //     profileImage: attachments[1],
+      //   }).execute();
+      // ──────────────────────────────────────────────────────────────────────
+
+      return {
+        received: {
+          name,
+          email,
+          cv: fileInfo(cv),
+          profileImage: fileInfo(profileImage),
+        },
+      };
+    }),
 });
