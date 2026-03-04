@@ -1,5 +1,5 @@
 import { createTRPCReact, type CreateTRPCReact } from "@trpc/react-query";
-import { httpBatchLink, type TRPCClient } from "@trpc/client";
+import { httpBatchLink, httpLink, splitLink, type TRPCClient } from "@trpc/client";
 import type { AppRouter } from "@repo/server/router";
 
 /**
@@ -17,19 +17,20 @@ const BASE_URL =
   import.meta.env.VITE_TRPC_URL ||
   "http://localhost:3001/api";
 
+const trpcUrl = `${BASE_URL}/trpc`;
+
 /**
  * Create tRPC client
+ *
+ * Uses splitLink so that FormData mutations (multipart/form-data) are sent
+ * through httpLink (no batching), while all other requests use httpBatchLink.
  */
 export const trpcClient: TRPCClient<AppRouter> = trpc.createClient({
   links: [
-    httpBatchLink({
-      url: `${BASE_URL}/trpc`,
-      // Optional: add headers, credentials, etc.
-      // headers() {
-      //   return {
-      //     authorization: getAuthToken(),
-      //   };
-      // },
+    splitLink({
+      condition: (op) => op.input instanceof FormData,
+      true: httpLink({ url: trpcUrl }),
+      false: httpBatchLink({ url: trpcUrl }),
     }),
   ],
 });
