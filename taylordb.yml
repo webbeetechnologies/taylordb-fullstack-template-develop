@@ -44,6 +44,7 @@ services:
   
   client:
     workDir: apps/client
+    publicEnvPrefix: VITE_
     install:
       commands:
         - pnpm install
@@ -52,23 +53,23 @@ services:
       port: 5173
       env:
         vars:
-          VITE_TRPC_URL: routing.server.url
+          TRPC_URL: routing.server.url
     start:
       command: pnpm preview --port 5173
       port: 5173
       env:
         vars:
-          VITE_TRPC_URL: routing.server.url
+          TRPC_URL: routing.server.url
       
     build:
       commands:
         - pnpm build
       env:
         vars:
-          VITE_TRPC_URL: routing.server.url
+          TRPC_URL: routing.server.url
 
 taylordb:
-  version: 0.9.0
+  version: 0.14.0
   types:
     - output: apps/server/taylordb/types.ts
       format: typescript
